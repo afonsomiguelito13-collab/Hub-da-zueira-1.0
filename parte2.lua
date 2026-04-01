@@ -1,15 +1,16 @@
+
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local LP = Players.LocalPlayer
 
-local ICONS = _G.HubGui and {
+local ICONS = {
     hub="rbxassetid://10723407389", teleport="rbxassetid://6026568220",
     anim="rbxassetid://6022668888", visao="rbxassetid://6035078856",
     troll="rbxassetid://6035067836", player="rbxassetid://6026568198",
-    settings="rbxassetid://6022668916",
-} or {}
+    settings="rbxassetid://6022668916", credits="rbxassetid://6022668898",
+}
 
 -- PAGES
 local pagePlayer   = _G.makeTabPage()
@@ -17,6 +18,7 @@ local pageTroll    = _G.makeTabPage()
 local pageTeleport = _G.makeTabPage()
 local pageAnim     = _G.makeTabPage()
 local pageDalton   = _G.makeTabPage()
+local pageCreditos = _G.makeTabPage()
 local pageSettings = _G.makeTabPage()
 
 _G.makeTabBtn("Player",   ICONS.player,   pagePlayer)
@@ -24,6 +26,7 @@ _G.makeTabBtn("Troll",    ICONS.troll,    pageTroll)
 _G.makeTabBtn("Teleport", ICONS.teleport, pageTeleport)
 _G.makeTabBtn("Anim",     ICONS.anim,     pageAnim)
 _G.makeTabBtn("Visao",    ICONS.visao,    pageDalton)
+_G.makeTabBtn("Credits",  ICONS.credits,  pageCreditos)
 _G.makeTabBtn("Settings", ICONS.settings, pageSettings)
 
 -- TAB PLAYER
@@ -234,11 +237,11 @@ local function applyFilter(color)
 end
 
 local filters={
-    {name="Normal",       desc="Remove filtro",           color=nil},
-    {name="Protanopia",   desc="Dificuldade com vermelho", color=Color3.fromRGB(255,220,100)},
-    {name="Deuteranopia", desc="Dificuldade com verde",    color=Color3.fromRGB(100,200,255)},
-    {name="Tritanopia",   desc="Dificuldade com azul",     color=Color3.fromRGB(255,150,150)},
-    {name="Alto Contraste",desc="Máximo contraste",        color=Color3.fromRGB(255,255,255)},
+    {name="Normal",        desc="Remove filtro",           color=nil},
+    {name="Protanopia",    desc="Dificuldade com vermelho", color=Color3.fromRGB(255,220,100)},
+    {name="Deuteranopia",  desc="Dificuldade com verde",    color=Color3.fromRGB(100,200,255)},
+    {name="Tritanopia",    desc="Dificuldade com azul",     color=Color3.fromRGB(255,150,150)},
+    {name="Alto Contraste",desc="Máximo contraste",         color=Color3.fromRGB(255,255,255)},
 }
 for _,f in ipairs(filters) do
     _G.addButton(pageDalton,f.name,f.desc,function() applyFilter(f.color) end)
@@ -262,6 +265,73 @@ _G.addToggle(pageDalton,"Contorno nos Players","Facilita ver jogadores",function
     end
 end)
 
+-- TAB CREDITOS
+_G.addSection(pageCreditos,"Hub da Zueira 1.0")
+
+local creditos = {
+    {nome="afonsomiguelito13", role="👑 Criador / Developer"},
+    {nome="Claude AI",         role="🤖 Assistente de código"},
+}
+
+for _,c in ipairs(creditos) do
+    local f=Instance.new("Frame",pageCreditos)
+    f.Size=UDim2.new(1,0,0,65)
+    f.BackgroundColor3=Color3.fromRGB(25,12,12)
+    f.BorderSizePixel=0
+    Instance.new("UICorner",f).CornerRadius=UDim.new(0,8)
+
+    local iconBg=Instance.new("Frame",f)
+    iconBg.Size=UDim2.new(0,42,0,42)
+    iconBg.Position=UDim2.new(0,10,0.5,-21)
+    iconBg.BackgroundColor3=Color3.fromRGB(180,50,50)
+    iconBg.BorderSizePixel=0
+    Instance.new("UICorner",iconBg).CornerRadius=UDim.new(1,0)
+
+    local initial=Instance.new("TextLabel",iconBg)
+    initial.Size=UDim2.new(1,0,1,0)
+    initial.BackgroundTransparency=1
+    initial.Text=string.upper(string.sub(c.nome,1,1))
+    initial.TextColor3=Color3.fromRGB(255,255,255)
+    initial.TextSize=20
+    initial.Font=Enum.Font.GothamBold
+
+    local nome=Instance.new("TextLabel",f)
+    nome.Size=UDim2.new(1,-70,0,24)
+    nome.Position=UDim2.new(0,62,0,12)
+    nome.BackgroundTransparency=1
+    nome.Text=c.nome
+    nome.TextColor3=Color3.fromRGB(230,230,230)
+    nome.TextSize=14
+    nome.Font=Enum.Font.GothamBold
+    nome.TextXAlignment=Enum.TextXAlignment.Left
+
+    local role=Instance.new("TextLabel",f)
+    role.Size=UDim2.new(1,-70,0,20)
+    role.Position=UDim2.new(0,62,0,36)
+    role.BackgroundTransparency=1
+    role.Text=c.role
+    role.TextColor3=Color3.fromRGB(160,100,100)
+    role.TextSize=12
+    role.Font=Enum.Font.Gotham
+    role.TextXAlignment=Enum.TextXAlignment.Left
+end
+
+_G.addSection(pageCreditos,"Versão")
+
+local verFrame=Instance.new("Frame",pageCreditos)
+verFrame.Size=UDim2.new(1,0,0,55)
+verFrame.BackgroundColor3=Color3.fromRGB(25,12,12)
+verFrame.BorderSizePixel=0
+Instance.new("UICorner",verFrame).CornerRadius=UDim.new(0,8)
+
+local verLabel=Instance.new("TextLabel",verFrame)
+verLabel.Size=UDim2.new(1,0,1,0)
+verLabel.BackgroundTransparency=1
+verLabel.Text="Hub da Zueira  v1.0  🇧🇷"
+verLabel.TextColor3=Color3.fromRGB(180,50,50)
+verLabel.TextSize=16
+verLabel.Font=Enum.Font.GothamBold
+
 -- TAB SETTINGS
 _G.addSection(pageSettings,"Hub")
 _G.addButton(pageSettings,"Fechar Hub","Fecha tudo",function()
@@ -271,7 +341,7 @@ _G.addButton(pageSettings,"Fechar Hub","Fecha tudo",function()
     task.delay(0.3,function() _G.MainFrame.Visible=false end)
 end)
 
--- LOADING ANIMAÇÃO
+-- LOADING
 task.spawn(function()
     local msgs={"Iniciando...","Carregando funções...","Preparando troll...","Quase lá...","Pronto!"}
     for i,msg in ipairs(msgs) do
@@ -292,7 +362,6 @@ task.spawn(function()
     end
     task.wait(0.5)
     _G.LF:Destroy()
-    -- abrir hub
     _G.MainFrame.Visible=true
     _G.MainFrame.Size=UDim2.new(0,0,0,0)
     _G.MainFrame.Position=UDim2.new(0.5,0,0.5,0)
