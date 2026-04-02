@@ -2,3 +2,5 @@ local base = "https://raw.githubusercontent.com/afonsomiguelito13-collab/Hub-da-
 loadstring(game:HttpGet(base.."parte1.lua"))()
 task.wait(1)
 loadstring(game:HttpGet(base.."parte2.lua"))()
+task.wait(1)
+loadstring(game:HttpGet(base.."parte3.lua"))()
