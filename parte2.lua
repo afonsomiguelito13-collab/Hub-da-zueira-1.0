@@ -10,9 +10,9 @@ local ICONS = {
     anim="rbxassetid://6022668888", visao="rbxassetid://6035078856",
     settings="rbxassetid://6022668916", credits="rbxassetid://6022668898",
     executor="rbxassetid://6034509993",
+    up="rbxassetid://6031068421", down="rbxassetid://6031094667",
 }
 
--- PAGES
 _G.pagePlayer   = _G.makeTabPage()
 _G.pageTroll    = _G.makeTabPage()
 _G.pageTeleport = _G.makeTabPage()
@@ -23,7 +23,7 @@ _G.makeTabBtn("Teleport", ICONS.teleport, _G.pageTeleport)
 
 -- ========== TAB PLAYER ==========
 _G.addSection(_G.pagePlayer,"Movimentação")
-local ws = 16
+local ws=16
 _G.addSlider(_G.pagePlayer,"WalkSpeed",16,500,16,function(v)
     ws=v
     if LP.Character then LP.Character.Humanoid.WalkSpeed=v end
@@ -44,6 +44,7 @@ LP.CharacterAdded:Connect(function(c)
 end)
 
 _G.addSection(_G.pagePlayer,"Movimento Especial")
+
 local noclip=false
 _G.addToggle(_G.pagePlayer,"Noclip","Atravessa paredes",function(v) noclip=v end)
 RunService.Stepped:Connect(function()
@@ -54,10 +55,13 @@ RunService.Stepped:Connect(function()
     end
 end)
 
+-- FLY COM SUPORTE MOBILE
 local flyOn=false
 local flyBV=nil
 local flyBG=nil
 local flySpd=60
+local goUp=false
+local goDown=false
 
 _G.addToggle(_G.pagePlayer,"Fly","Voa pelo mapa",function(v)
     flyOn=v
@@ -66,6 +70,7 @@ _G.addToggle(_G.pagePlayer,"Fly","Voa pelo mapa",function(v)
     local hrp=char:FindFirstChild("HumanoidRootPart")
     local hum=char:FindFirstChildOfClass("Humanoid")
     if not hrp or not hum then return end
+
     if v then
         hum.PlatformStand=true
         flyBV=Instance.new("BodyVelocity")
@@ -78,12 +83,65 @@ _G.addToggle(_G.pagePlayer,"Fly","Voa pelo mapa",function(v)
         flyBG.CFrame=hrp.CFrame
         flyBG.Name="FlyGyro"
         flyBG.Parent=hrp
+
+        -- Botões mobile subir/descer
+        local flyGui=Instance.new("ScreenGui",LP.PlayerGui)
+        flyGui.Name="FlyButtons"
+        flyGui.ResetOnSpawn=false
+        flyGui.IgnoreGuiInset=true
+        _G.flyGui=flyGui
+
+        local function makeFlyBtn(icon, posX, posY, onHold)
+            local btn=Instance.new("ImageButton",flyGui)
+            btn.Size=UDim2.new(0,65,0,65)
+            btn.Position=UDim2.new(posX,-32,posY,-32)
+            btn.BackgroundColor3=Color3.fromRGB(20,10,10)
+            btn.Image=icon
+            btn.ImageColor3=Color3.fromRGB(255,255,255)
+            btn.BorderSizePixel=0
+            Instance.new("UICorner",btn).CornerRadius=UDim.new(1,0)
+            local stroke=Instance.new("UIStroke",btn)
+            stroke.Color=Color3.fromRGB(180,50,50)
+            stroke.Thickness=2
+
+            btn.InputBegan:Connect(function(i)
+                if i.UserInputType==Enum.UserInputType.Touch
+                or i.UserInputType==Enum.UserInputType.MouseButton1 then
+                    onHold(true)
+                end
+            end)
+            btn.InputEnded:Connect(function(i)
+                if i.UserInputType==Enum.UserInputType.Touch
+                or i.UserInputType==Enum.UserInputType.MouseButton1 then
+                    onHold(false)
+                end
+            end)
+            return btn
+        end
+
+        -- Subir (canto direito inferior)
+        makeFlyBtn(ICONS.up, 1, 1, function(state)
+            goUp=state
+        end)
+
+        -- Descer
+        makeFlyBtn(ICONS.down, 1, 1, function(state)
+            goDown=state
+        end)
+
+        -- Posicionar botões
+        local btns=flyGui:GetChildren()
+        if btns[1] then btns[1].Position=UDim2.new(1,-90,1,-170) end
+        if btns[2] then btns[2].Position=UDim2.new(1,-90,1,-95) end
+
     else
         hum.PlatformStand=false
         if flyBV then flyBV:Destroy() flyBV=nil end
         if flyBG then flyBG:Destroy() flyBG=nil end
         local g=hrp:FindFirstChild("FlyGyro")
         if g then g:Destroy() end
+        if _G.flyGui then _G.flyGui:Destroy() _G.flyGui=nil end
+        goUp=false goDown=false
     end
 end)
 
@@ -93,12 +151,16 @@ RunService.RenderStepped:Connect(function()
     if not hrp or not flyBV then return end
     local cam=workspace.CurrentCamera
     local dir=Vector3.zero
+
+    -- PC
     if UIS:IsKeyDown(Enum.KeyCode.W) then dir=dir+cam.CFrame.LookVector end
     if UIS:IsKeyDown(Enum.KeyCode.S) then dir=dir-cam.CFrame.LookVector end
     if UIS:IsKeyDown(Enum.KeyCode.A) then dir=dir-cam.CFrame.RightVector end
     if UIS:IsKeyDown(Enum.KeyCode.D) then dir=dir+cam.CFrame.RightVector end
     if UIS:IsKeyDown(Enum.KeyCode.Space) then dir=dir+Vector3.new(0,1,0) end
     if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then dir=dir-Vector3.new(0,1,0) end
+
+    -- Mobile thumbstick
     local tGui=LP.PlayerGui:FindFirstChild("TouchGui")
     if tGui then
         local ctrl=tGui:FindFirstChild("TouchControlFrame")
@@ -115,6 +177,11 @@ RunService.RenderStepped:Connect(function()
             end
         end
     end
+
+    -- Mobile botões subir/descer
+    if goUp then dir=dir+Vector3.new(0,1,0) end
+    if goDown then dir=dir-Vector3.new(0,1,0) end
+
     flyBV.Velocity=dir.Magnitude>0 and dir.Unit*flySpd or Vector3.zero
     local g=hrp:FindFirstChild("FlyGyro")
     if g then g.CFrame=cam.CFrame end
