@@ -14,7 +14,7 @@ _G.makeTabBtn("Credits",  ICONS.credits,  pageCreditos)
 _G.makeTabBtn("Settings", ICONS.settings, pageSettings)
 
 -- ========== TAB CREDITOS ==========
-_G.addSection(pageCreditos,"Hub da Zueira 1.2")
+_G.addSection(pageCreditos,"Hub da Zueira 1.4")
 local creditos={
     {nome="afonsomiguelito13",role="👑 Criador / Developer"},
     {nome="Claude AI",        role="🤖 Assistente de código"},
@@ -71,7 +71,7 @@ Instance.new("UICorner",vf).CornerRadius=UDim.new(0,8)
 local vl=Instance.new("TextLabel",vf)
 vl.Size=UDim2.new(1,0,1,0)
 vl.BackgroundTransparency=1
-vl.Text="Hub da Zueira  v1.2  🇧🇷"
+vl.Text="Hub da Zueira  v1.4  🇧🇷"
 vl.TextColor3=Color3.fromRGB(180,50,50)
 vl.TextSize=16
 vl.Font=Enum.Font.GothamBold
@@ -84,6 +84,118 @@ _G.addButton(pageSettings,"Fechar Hub","Fecha tudo",function()
         Position=UDim2.new(0.5,0,0.5,0)
     }):Play()
     task.delay(0.3,function() _G.MainFrame.Visible=false end)
+end)
+
+-- ========== THEME CUSTOMIZER ==========
+_G.addSection(pageSettings,"Theme Customizer")
+
+-- Cor atual do tema
+_G.themeColor = Color3.fromRGB(180,50,50)
+
+-- Preview
+local previewFrame=Instance.new("Frame",pageSettings)
+previewFrame.Size=UDim2.new(1,0,0,50)
+previewFrame.BackgroundColor3=Color3.fromRGB(25,12,12)
+previewFrame.BorderSizePixel=0
+Instance.new("UICorner",previewFrame).CornerRadius=UDim.new(0,8)
+
+local previewColor=Instance.new("Frame",previewFrame)
+previewColor.Size=UDim2.new(0,40,0,40)
+previewColor.Position=UDim2.new(0,8,0.5,-20)
+previewColor.BackgroundColor3=_G.themeColor
+previewColor.BorderSizePixel=0
+Instance.new("UICorner",previewColor).CornerRadius=UDim.new(0,8)
+
+local previewLabel=Instance.new("TextLabel",previewFrame)
+previewLabel.Size=UDim2.new(1,-60,1,0)
+previewLabel.Position=UDim2.new(0,56,0,0)
+previewLabel.BackgroundTransparency=1
+previewLabel.Text="Cor atual do tema"
+previewLabel.TextColor3=Color3.fromRGB(200,200,200)
+previewLabel.TextSize=13
+previewLabel.Font=Enum.Font.Gotham
+previewLabel.TextXAlignment=Enum.TextXAlignment.Left
+
+-- Função aplicar tema
+_G.applyTheme=function(color)
+    _G.themeColor=color
+    previewColor.BackgroundColor3=color
+
+    -- Aplicar em todos os elementos do hub
+    for _,tab in ipairs(_G.tabs) do
+        TweenService:Create(tab.indicator,TweenInfo.new(0.3),{BackgroundColor3=color}):Play()
+        if tab == _G.activeTab then
+            tab.btnIcon.ImageColor3=color
+            tab.btnLabel.TextColor3=Color3.fromRGB(255,255,255)
+        end
+    end
+
+    -- Stroke principal
+    for _,v in ipairs(_G.MainFrame:GetDescendants()) do
+        if v:IsA("UIStroke") then
+            TweenService:Create(v,TweenInfo.new(0.3),{Color=color}):Play()
+        end
+        if v:IsA("Frame") and v.BackgroundColor3==_G.themeColor then
+            TweenService:Create(v,TweenInfo.new(0.3),{BackgroundColor3=color}):Play()
+        end
+    end
+end
+
+-- Cores predefinidas
+local presets={
+    {name="Vermelho", color=Color3.fromRGB(180,50,50)},
+    {name="Azul",     color=Color3.fromRGB(50,100,200)},
+    {name="Verde",    color=Color3.fromRGB(50,180,80)},
+    {name="Roxo",     color=Color3.fromRGB(130,50,200)},
+    {name="Laranja",  color=Color3.fromRGB(220,120,30)},
+    {name="Rosa",     color=Color3.fromRGB(220,60,140)},
+}
+
+local presetsFrame=Instance.new("Frame",pageSettings)
+presetsFrame.Size=UDim2.new(1,0,0,44)
+presetsFrame.BackgroundTransparency=1
+presetsFrame.BorderSizePixel=0
+
+local presetsLayout=Instance.new("UIListLayout",presetsFrame)
+presetsLayout.FillDirection=Enum.FillDirection.Horizontal
+presetsLayout.Padding=UDim.new(0,6)
+presetsLayout.SortOrder=Enum.SortOrder.LayoutOrder
+
+for i,p in ipairs(presets) do
+    local btn=Instance.new("TextButton",presetsFrame)
+    btn.Size=UDim2.new(0,44,0,44)
+    btn.BackgroundColor3=p.color
+    btn.Text=""
+    btn.BorderSizePixel=0
+    btn.LayoutOrder=i
+    Instance.new("UICorner",btn).CornerRadius=UDim.new(1,0)
+    btn.MouseButton1Click:Connect(function()
+        _G.applyTheme(p.color)
+        -- feedback
+        TweenService:Create(btn,TweenInfo.new(0.1),{Size=UDim2.new(0,38,0,38)}):Play()
+        task.delay(0.15,function()
+            TweenService:Create(btn,TweenInfo.new(0.1),{Size=UDim2.new(0,44,0,44)}):Play()
+        end)
+    end)
+end
+
+-- Sliders RGB
+_G.addSection(pageSettings,"RGB Personalizado")
+
+local rVal=180 local gVal=50 local bVal=50
+
+local function updateRGB()
+    _G.applyTheme(Color3.fromRGB(rVal,gVal,bVal))
+end
+
+_G.addSlider(pageSettings,"R (Vermelho)",0,255,180,function(v)
+    rVal=v updateRGB()
+end)
+_G.addSlider(pageSettings,"G (Verde)",0,255,50,function(v)
+    gVal=v updateRGB()
+end)
+_G.addSlider(pageSettings,"B (Azul)",0,255,50,function(v)
+    bVal=v updateRGB()
 end)
 
 -- ========== LOADING ==========
@@ -121,4 +233,4 @@ task.spawn(function()
     _G.openTab(_G.tabs[1])
 end)
 
-print("Parte4 carregada! Hub da Zueira v1.2 🇧🇷")
+print("Parte4 carregada!")
